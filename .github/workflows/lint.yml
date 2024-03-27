@@ -1,0 +1,42 @@
+name: Code Check
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+concurrency:
+  group: ${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    name: Lint, Typecheck, and Test Jobs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v4
+
+      - name: Setup Corepack 📦
+        run: corepack enable
+
+      - name: Setup node 🏗
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies 📦
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint 🔬
+        run: pnpm run lint:strict
+
+      - name: Type Check 🔎
+        run: pnpm run typecheck
+
+      - name: Prettier Check 💅
+        run: pnpm run format:check
+
+      - name: Run Test 🧪
+        run: pnpm run test
